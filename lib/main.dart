@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import 'package:flutter_application_1/login_page.dart';
 
 void main() {
   runApp(const ChefMateApp());
 }
 
 class ChefMateApp extends StatelessWidget {
-  const ChefMateApp({Key? key}) : super(key: key);
+  const ChefMateApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class ChefMateApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'ChefMate',
       theme: ThemeData.dark(),
-      home: HomePage(),
+      home: const LoginPage(),
     );
   }
 }

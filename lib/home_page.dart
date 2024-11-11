@@ -2,29 +2,39 @@ import 'package:flutter/material.dart';
 import 'recipe_listing_page.dart';
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5),
+      extendBodyBehindAppBar: true, // Allows the body to extend behind the AppBar
       appBar: AppBar(
-        title: Text('ChefMate', style: TextStyle(color: Color(0xFF229799))),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        backgroundColor: Colors.transparent, // Makes the AppBar background transparent
+        title: const Text('ChefMate', style: TextStyle(color: Color(0xFF229799))),
+        elevation: 0, // Removes the AppBar shadow
         centerTitle: true,
       ),
-      body: Center(
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF48CFCB),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/home_background.png'), // Background image
+            fit: BoxFit.cover, // Makes the image cover the entire screen
           ),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeListingPage()));
-          },
-          child: Text('View Recipes', style: TextStyle(color: Colors.white, fontSize: 18)),
+        ),
+        child: Center(
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF48CFCB),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            ),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const RecipeListingPage()));
+            },
+            child: const Text('View Recipes', style: TextStyle(color: Colors.white, fontSize: 18)),
+          ),
         ),
       ),
     );
