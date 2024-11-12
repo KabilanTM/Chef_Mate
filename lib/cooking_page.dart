@@ -7,7 +7,8 @@ class CookingPage extends StatefulWidget {
   final Recipe recipe;
   final int personCount;
 
-  const CookingPage({super.key, required this.recipe, required this.personCount});
+  const CookingPage(
+      {super.key, required this.recipe, required this.personCount});
 
   @override
   _CookingPageState createState() => _CookingPageState();
@@ -33,7 +34,8 @@ class _CookingPageState extends State<CookingPage> {
       if (_timerValue > 0 && !_isPaused) {
         setState(() {
           _timerValue--;
-          _progress = _timerValue / (minutes * 60 * widget.personCount); // Update progress
+          _progress = _timerValue /
+              (minutes * 60 * widget.personCount); // Update progress
         });
       } else if (_timerValue == 0) {
         timer.cancel();
@@ -70,49 +72,52 @@ class _CookingPageState extends State<CookingPage> {
   }
 
   Future<void> _showCompletionScreen() async {
-  await _audioPlayer.play(AssetSource('alarm.mp3'));
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) {
-      return Scaffold(
-        backgroundColor: Colors.transparent, // Transparent background for the dialog
-        body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/finish.jpg'), // Add your custom background image
-              fit: BoxFit.cover, // Ensure the image covers the entire screen
+    await _audioPlayer.play(AssetSource('alarm.mp3'));
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Scaffold(
+          backgroundColor:
+              Colors.transparent, // Transparent background for the dialog
+          body: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(
+                    'assets/finish.jpg'), // Add your custom background image
+                fit: BoxFit.cover, // Ensure the image covers the entire screen
+              ),
             ),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  '🎉 Hooray! Cooking Complete! 🎉',
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.amber,
-                    fontWeight: FontWeight.bold,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    '🎉 Hooray! Cooking Complete! 🎉',
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.amber,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _audioPlayer.stop();
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Finish'),
-                ),
-              ],
+                  ElevatedButton(
+                    onPressed: () {
+                      _audioPlayer.stop();
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Finish'),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -131,9 +136,11 @@ class _CookingPageState extends State<CookingPage> {
     final currentStep = widget.recipe.steps[_currentStep];
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Make the Scaffold background transparent
+      backgroundColor:
+          Colors.transparent, // Make the Scaffold background transparent
       appBar: AppBar(
-        title: Text('Cooking ${widget.recipe.name}', style: const TextStyle(color: Color(0xFF229799))),
+        title: Text('Cooking ${widget.recipe.name}',
+            style: const TextStyle(color: Color(0xFF229799))),
         backgroundColor: Colors.transparent, // Make AppBar transparent
         elevation: 0,
         centerTitle: true,
@@ -153,14 +160,16 @@ class _CookingPageState extends State<CookingPage> {
             children: [
               Text(
                 currentStep.description,
-                style: const TextStyle(fontSize: 24, color: Color.fromARGB(255, 255, 255, 255)),
+                style: const TextStyle(
+                    fontSize: 24, color: Color.fromARGB(255, 255, 255, 255)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               LayoutBuilder(
                 builder: (context, constraints) {
                   // Calculate the size for the circle to be equal in width and height
-                  double circleSize = constraints.maxWidth * 0.7; // Make it 70% of the screen width
+                  double circleSize = constraints.maxWidth *
+                      0.7; // Make it 70% of the screen width
                   return Center(
                     child: Stack(
                       alignment: Alignment.center,
@@ -172,13 +181,18 @@ class _CookingPageState extends State<CookingPage> {
                           child: CircularProgressIndicator(
                             value: _progress,
                             strokeWidth: 15,
-                            backgroundColor: const Color.fromARGB(255, 88, 73, 73),
-                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF48CFCB)),
+                            backgroundColor:
+                                const Color.fromARGB(255, 88, 73, 73),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFF48CFCB)),
                           ),
                         ),
                         Text(
                           '${(_timerValue ~/ 60).toString().padLeft(2, '0')}:${(_timerValue % 60).toString().padLeft(2, '0')}',
-                          style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 255, 255, 255)),
+                          style: const TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 255, 255, 255)),
                         ),
                       ],
                     ),
@@ -191,7 +205,10 @@ class _CookingPageState extends State<CookingPage> {
                   padding: EdgeInsets.only(top: 20.0),
                   child: Text(
                     'Step Completed! Press "Next Step" to continue.',
-                    style: TextStyle(fontSize: 20, color: Colors.green, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -205,7 +222,9 @@ class _CookingPageState extends State<CookingPage> {
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
-                    onPressed: _isStepCompleted ? _nextStep : null, // Disable button if step is not completed
+                    onPressed: _isStepCompleted
+                        ? _nextStep
+                        : null, // Disable button if step is not completed
                     child: const Text('Next Step'),
                   ),
                 ],
