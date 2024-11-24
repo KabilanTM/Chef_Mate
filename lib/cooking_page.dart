@@ -1,27 +1,52 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+
 import 'recipes.dart';
 
 class CookingPage extends StatefulWidget {
   final Recipe recipe;
   final int personCount;
 
-  const CookingPage(
-      {super.key, required this.recipe, required this.personCount});
+  const CookingPage({super.key, required this.recipe, required this.personCount});
 
   @override
   _CookingPageState createState() => _CookingPageState();
 }
 
 class _CookingPageState extends State<CookingPage> {
+  final FlutterTts flutterTts = FlutterTts(); // Updated to FlutterTts
+  final AudioPlayer _audioPlayer = AudioPlayer(); // Audio player for alarm
+
   int _currentStep = 0;
   bool _isPaused = false;
   bool _isStepCompleted = false;
   int _timerValue = 0;
   double _progress = 1.0; // Progress indicator for the circular timer
   Timer? _timer;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTTS();
+    _announceStep(); // Announce the first step
+    _startTimer(widget.recipe.steps[_currentStep].time);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  void _initializeTTS() async {
+    await flutterTts.setLanguage('en-US');
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setPitch(1.0);
+  }
 
   void _startTimer(int minutes) {
     setState(() {
@@ -34,8 +59,7 @@ class _CookingPageState extends State<CookingPage> {
       if (_timerValue > 0 && !_isPaused) {
         setState(() {
           _timerValue--;
-          _progress = _timerValue /
-              (minutes * 60 * widget.personCount); // Update progress
+          _progress = _timerValue / (minutes * 60 * widget.personCount); // Update progress
         });
       } else if (_timerValue == 0) {
         timer.cancel();
@@ -60,6 +84,7 @@ class _CookingPageState extends State<CookingPage> {
           _currentStep++;
           _isStepCompleted = false; // Reset step completed flag
         });
+        _announceStep(); // Announce the next step
         _startTimer(widget.recipe.steps[_currentStep].time);
       } else {
         _showCompletionScreen();
@@ -67,25 +92,32 @@ class _CookingPageState extends State<CookingPage> {
     }
   }
 
+  void _announceStep() async {
+    final step = widget.recipe.steps[_currentStep];
+    final scaledTime = step.time * widget.personCount;
+    String message =
+        "${step.description}. Estimated time for ${widget.personCount} person(s): $scaledTime minute(s).";
+    await flutterTts.speak(message); // Speak the step description
+  }
+
   Future<void> _playAlarm() async {
     await _audioPlayer.play(AssetSource('alarm.mp3'));
   }
 
   Future<void> _showCompletionScreen() async {
+    await flutterTts.speak("You have completed the recipe. Enjoy your meal!");
     await _audioPlayer.play(AssetSource('alarm.mp3'));
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return Scaffold(
-          backgroundColor:
-              Colors.transparent, // Transparent background for the dialog
+          backgroundColor: Colors.transparent,
           body: Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    'assets/finish.jpg'), // Add your custom background image
-                fit: BoxFit.cover, // Ensure the image covers the entire screen
+                image: AssetImage('assets/finish.jpg'),
+                fit: BoxFit.cover,
               ),
             ),
             child: Center(
@@ -119,37 +151,23 @@ class _CookingPageState extends State<CookingPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _startTimer(widget.recipe.steps[_currentStep].time);
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final currentStep = widget.recipe.steps[_currentStep];
 
     return Scaffold(
-      backgroundColor:
-          Colors.transparent, // Make the Scaffold background transparent
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text('Cooking ${widget.recipe.name}',
             style: const TextStyle(color: Color(0xFF229799))),
-        backgroundColor: Colors.transparent, // Make AppBar transparent
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
       ),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/list_bg.jpg'), // Set the background image
-            fit: BoxFit.cover, // Make the image cover the whole screen
+            image: AssetImage('assets/list_bg.jpg'),
+            fit: BoxFit.cover,
           ),
         ),
         child: Padding(
@@ -167,22 +185,18 @@ class _CookingPageState extends State<CookingPage> {
               const SizedBox(height: 20),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  // Calculate the size for the circle to be equal in width and height
-                  double circleSize = constraints.maxWidth *
-                      0.7; // Make it 70% of the screen width
+                  double circleSize = constraints.maxWidth * 0.7;
                   return Center(
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // Full-screen circular progress indicator
                         SizedBox(
                           height: circleSize,
                           width: circleSize,
                           child: CircularProgressIndicator(
                             value: _progress,
                             strokeWidth: 15,
-                            backgroundColor:
-                                const Color.fromARGB(255, 88, 73, 73),
+                            backgroundColor: const Color.fromARGB(255, 88, 73, 73),
                             valueColor: const AlwaysStoppedAnimation<Color>(
                                 Color(0xFF48CFCB)),
                           ),
@@ -222,9 +236,7 @@ class _CookingPageState extends State<CookingPage> {
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
-                    onPressed: _isStepCompleted
-                        ? _nextStep
-                        : null, // Disable button if step is not completed
+                    onPressed: _isStepCompleted ? _nextStep : null,
                     child: const Text('Next Step'),
                   ),
                 ],
