@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'package:ChefMate/recipe.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'recipes.dart';
 
 class CookingPage extends StatefulWidget {
   final Recipe recipe;
@@ -25,7 +25,7 @@ class _CookingPageState extends State<CookingPage> {
 
   void _startTimer(int minutes) {
     setState(() {
-      _timerValue = minutes * 60 * widget.personCount;
+      _timerValue = minutes * 60; // Timer value is in seconds
       _isPaused = false;
       _progress = 1.0; // Reset progress to full circle
     });
@@ -34,8 +34,7 @@ class _CookingPageState extends State<CookingPage> {
       if (_timerValue > 0 && !_isPaused) {
         setState(() {
           _timerValue--;
-          _progress = _timerValue /
-              (minutes * 60 * widget.personCount); // Update progress
+          _progress = _timerValue / (minutes * 60); // Update progress
         });
       } else if (_timerValue == 0) {
         timer.cancel();
@@ -60,7 +59,8 @@ class _CookingPageState extends State<CookingPage> {
           _currentStep++;
           _isStepCompleted = false; // Reset step completed flag
         });
-        _startTimer(widget.recipe.steps[_currentStep].time);
+        // Start the timer for the next step
+        _startTimer(widget.recipe.steps[_currentStep][1]); // Get time from the next step
       } else {
         _showCompletionScreen();
       }
@@ -121,7 +121,8 @@ class _CookingPageState extends State<CookingPage> {
   @override
   void initState() {
     super.initState();
-    _startTimer(widget.recipe.steps[_currentStep].time);
+    // Start the timer for the first step
+    _startTimer(widget.recipe.steps[_currentStep][1]); // Get time from first step
   }
 
   @override
@@ -134,10 +135,11 @@ class _CookingPageState extends State<CookingPage> {
   @override
   Widget build(BuildContext context) {
     final currentStep = widget.recipe.steps[_currentStep];
+    String description = currentStep[0]; // Accessing the description
+    int time = currentStep[1]; // Accessing the time (in minutes)
 
     return Scaffold(
-      backgroundColor:
-          Colors.transparent, // Make the Scaffold background transparent
+      backgroundColor: Colors.transparent, // Make the Scaffold background transparent
       appBar: AppBar(
         title: Text('Cooking ${widget.recipe.name}',
             style: const TextStyle(color: Color(0xFF229799))),
@@ -159,7 +161,7 @@ class _CookingPageState extends State<CookingPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                currentStep.description,
+                description, // Use the description here
                 style: const TextStyle(
                     fontSize: 24, color: Color.fromARGB(255, 255, 255, 255)),
                 textAlign: TextAlign.center,
@@ -168,8 +170,7 @@ class _CookingPageState extends State<CookingPage> {
               LayoutBuilder(
                 builder: (context, constraints) {
                   // Calculate the size for the circle to be equal in width and height
-                  double circleSize = constraints.maxWidth *
-                      0.7; // Make it 70% of the screen width
+                  double circleSize = constraints.maxWidth * 0.7; // Make it 70% of the screen width
                   return Center(
                     child: Stack(
                       alignment: Alignment.center,
@@ -181,10 +182,8 @@ class _CookingPageState extends State<CookingPage> {
                           child: CircularProgressIndicator(
                             value: _progress,
                             strokeWidth: 15,
-                            backgroundColor:
-                                const Color.fromARGB(255, 88, 73, 73),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFF48CFCB)),
+                            backgroundColor: const Color.fromARGB(255, 88, 73, 73),
+                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF48CFCB)),
                           ),
                         ),
                         Text(
