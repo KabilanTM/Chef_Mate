@@ -10,7 +10,7 @@ class MongoHelper {
     const String uri = 'mongodb+srv://maintainer_philix:qwertyuiop@carbonpi.hiozz58.mongodb.net/chefmate?retryWrites=true&w=majority';  // Replace with your MongoDB connection string
     db = await Db.create(uri);
     await db.open();
-    recipeCollection = db.collection('recipes');  
+    recipeCollection = db.collection('recipes'); 
   }
 
   // Fetch all recipes

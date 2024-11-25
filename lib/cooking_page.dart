@@ -2,13 +2,16 @@ import 'dart:async';
 import 'package:ChefMate/recipe.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'recipes.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+
+import 'recipe.dart';
 
 class CookingPage extends StatefulWidget {
   final Recipe recipe;
   final int personCount;
 
-  const CookingPage({super.key, required this.recipe, required this.personCount});
+  const CookingPage(
+      {super.key, required this.recipe, required this.personCount});
 
   @override
   _CookingPageState createState() => _CookingPageState();
@@ -30,7 +33,7 @@ class _CookingPageState extends State<CookingPage> {
     super.initState();
     _initializeTTS();
     _announceStep(); // Announce the first step
-    _startTimer(widget.recipe.steps[_currentStep].time);
+    _startTimer(widget.recipe.steps[_currentStep][1]);
   }
 
   @override
@@ -49,7 +52,7 @@ class _CookingPageState extends State<CookingPage> {
 
   void _startTimer(int minutes) {
     setState(() {
-      _timerValue = minutes * 60; // Timer value is in seconds
+      _timerValue = minutes * 60 * widget.personCount;
       _isPaused = false;
       _progress = 1.0; // Reset progress to full circle
     });
@@ -84,7 +87,8 @@ class _CookingPageState extends State<CookingPage> {
           _currentStep++;
           _isStepCompleted = false; // Reset step completed flag
         });
-        _startTimer(widget.recipe.steps[_currentStep].time);
+        _announceStep(); // Announce the next step
+        _startTimer(widget.recipe.steps[_currentStep][1]);
       } else {
         _showCompletionScreen();
       }
@@ -93,9 +97,9 @@ class _CookingPageState extends State<CookingPage> {
 
   void _announceStep() async {
     final step = widget.recipe.steps[_currentStep];
-    final scaledTime = step.time * widget.personCount;
+    final scaledTime = step[1] * widget.personCount;
     String message =
-        "${step.description}. Estimated time for ${widget.personCount} person(s): $scaledTime minute(s).";
+        "${step[0]}. Estimated time for ${widget.personCount} person(s): $scaledTime minute(s).";
     await flutterTts.speak(message); // Speak the step description
   }
 
@@ -150,27 +154,11 @@ class _CookingPageState extends State<CookingPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _startTimer(widget.recipe.steps[_currentStep].time);
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final currentStep = widget.recipe.steps[_currentStep];
-    String description = currentStep[0]; // Accessing the description
-    int time = currentStep[1]; // Accessing the time (in minutes)
 
     return Scaffold(
-      backgroundColor:
-          Colors.transparent, // Make the Scaffold background transparent
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text('Cooking ${widget.recipe.name}',
             style: const TextStyle(color: Color(0xFF229799))),
@@ -192,7 +180,7 @@ class _CookingPageState extends State<CookingPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                description, // Use the description here
+                currentStep[0],
                 style: const TextStyle(
                     fontSize: 24, color: Color.fromARGB(255, 255, 255, 255)),
                 textAlign: TextAlign.center,
@@ -200,9 +188,7 @@ class _CookingPageState extends State<CookingPage> {
               const SizedBox(height: 20),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  // Calculate the size for the circle to be equal in width and height
-                  double circleSize = constraints.maxWidth *
-                      0.7; // Make it 70% of the screen width
+                  double circleSize = constraints.maxWidth * 0.7;
                   return Center(
                     child: Stack(
                       alignment: Alignment.center,
